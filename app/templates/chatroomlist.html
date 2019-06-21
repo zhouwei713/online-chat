@@ -1,0 +1,57 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Flasky</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
+                {% else %}
+                <<li><a href="{{ url_for('main.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div> {% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Hello, {{ current_user.username }}!</h1>
+    </div>
+    <div class="page-header">
+        {% for i in roomlist %}
+        <p>{{ i }}   <a href="{{ url_for('main.join_chat_room', rname=i) }}" class="btn btn-default" role="button">Join This Room</a></p>
+        {% endfor %}
+    </div>
+  {% if can_create %}
+  <form action="{{ url_for('main.create_room') }}" method="POST" class="comment-form">
+         <div class="form-group comment-form-author">
+        <label for="chatroomname">Chat Room Name <span class="required">*</span></label>
+        <input class="form-control" id="chatroomname" name="chatroomname" type="text" value="" size="30" aria-required='true' />
+        </div>
+        <div class="form-group comment-form-comment">
+        <label for="description">Chat Room Description <span class="required">*</span></label>
+        <textarea class="form-control" id="description" name="description" cols="45" rows="6"></textarea>
+        </div>
+        <button  name="submit" type="submit" id="submit" class="btn btn-primary" value="Submit Comment">Create Room</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Flasky</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
+                {% else %}
+                <li><a href="{{ url_for('main.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div> {% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Hello, {{ current_user.username }}!</h1>
+    </div>
+    <a href="{{ url_for('main.chat_room_list') }}" class="btn btn-default" role="button">Go to Chat Room list</a>
+    <a href="{{ url_for('main.adduser') }}" class="btn btn-default" role="button">Add a new user</a>
+    <a href="{{ url_for('main.listuser') }}" class="btn btn-default" role="button">Go to user list</a>
+    <a href="{{ url_for('main.addper') }}" class="btn btn-default" role="button">Add a new permission</a>
+</div>
+{% endblock %}
