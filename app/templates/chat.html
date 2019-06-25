@@ -15,9 +15,10 @@
 {% endblock %}
 {% block content %}
 <body>
+<h1>ROOM: {{ rname }}</h1>
 <div class="chatbox">
   <div class="chat_top fn-clear">
-      <div class="uinfo fn-clear"  style="float: left;"><div class="uface"><h1 style="color: #7777">ROOM: {{ rname }}</h1></div></div>
+      <div class="uinfo fn-clear"  style="float: left;"><div class="uface"><h1 style="color: #7777"></h1></div></div>
     <div class="uinfo fn-clear">
     {% if current_user.is_authenticated %}
       <div class="uface"><img src="{{ current_user.gravatar(size=40) }}" width="40" height="40"  alt=""/></div>
@@ -25,9 +26,15 @@
       <div class="uface"><img src="{{ url_for('static', filename='chat/images/hi.jpg')}}" width="40" height="40"  alt=""/></div>
     {% endif %}
       <div class="uname">
-        {{ current_user.username }}<i class="fontico down"></i>
+          {% if current_user.is_authenticated %}
+        {{ current_user.username }}
+          {% else %}
+          游客
+          {% endif %}
+          <i class="fontico down"></i>
         <ul class="managerbox">
             {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('main.room_user_list', rname=rname) }}" target="_blank"><i class="fontico lock"></i>管理用户</a></li>
           <li><a href="{{ url_for('main.logout', rname=rname) }}"><i class="fontico lock"></i>退出登陆</a></li>
             <li><a href="{{ url_for('main.logout') }}"><i class="fontico lock"></i>退出房间</a></li>
             {% else %}
@@ -106,23 +113,45 @@
       </div>
     </div>
     <div class="chat_right">
-      <ul class="user_list" title="示例用户">
+      <ul class="user_list" title="">
         <li class="fn-clear selected"><em id="all">所有用户</em></li>
         <li class="fn-clear" data-id="1"><span><img src="{{ url_for('static', filename='chat/images/hi.jpg')}}" width="30" height="30"  alt=""/></span><em>小HI</em><small class="online" title="在线"></small></li>
           <li class="fn-clear" data-id="2"><span><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"  alt=""/></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
           {% if current_user.is_authenticated %}
           {% for i in user_list %}
           {% if i == current_user.username %}
+           {% if i in b_user_list %}
         <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(size=40) }}" width="30" height="30"  alt=""/></span>
+            <em>{{ i }}</em><small class="offline" title="禁言"></small></li>
+          {% else %}
+          <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(size=40) }}" width="30" height="30"  alt=""/></span>
             <em>{{ i }}</em><small class="online" title="在线"></small></li>
+          {% endif %}
+          {% else %}
+          {% if i in b_user_list %}
+          <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(name=i, size=40) }}" width="30" height="30"  alt=""/></span>
+            <em>{{ i }}</em>
+              <small class="offline" title="禁言">
+              </small>
+          </li>
           {% else %}
           <li class="fn-clear" data-id="3"><span><img src="{{ current_user.gravatar(name=i, size=40) }}" width="30" height="30"  alt=""/></span>
-            <em>{{ i }}</em><small class="online" title="在线"></small></li>
+            <em>{{ i }}</em>
+              <small class="online" title="在线">
+              </small>
+          </li>
+          {% endif %}
           {% endif %}
           {% endfor %}
           {% else %}
-          <li class="fn-clear" data-id="3"><span><img src="{{ g }}" width="30" height="30"  alt=""/></span>
-            <em>游客</em><small class="online" title="在线"></small></li>
+          <li class="fn-clear" data-id="3">
+              <span>
+                  <img src="{{ g }}" width="30" height="30"  alt=""/>
+              </span>
+            <em>游客</em>
+              <small class="online" title="在线">
+              </small>
+          </li>
           {% endif %}
       </ul>
     </div>
@@ -161,6 +190,16 @@ $(document).ready(function(e) {
 	    $('#message').focus().attr("placeholder", "您对"+to_uname+"说：");
 	    $('#message_not').focus().attr("placeholder", "您对"+to_uname+"说：");
 	});
+
+	/* 右键菜单 */
+	/*
+	$('.user_list > li').mousedown(function(e){
+	    if (3 == e.which){
+	        alert('thisis ');
+	    }
+	});
+	*/
+
     /*用户未登陆的用户点击提交按钮发送消息按钮*/
 	$('#sub_but').click(function(event){
 	    sendMessage(event, fromname, to_uid, to_uname);
@@ -219,7 +258,7 @@ function sendToServernoLogin(name, msg){
             var htmlData2 =   '<div class="msg_item fn-clear">'
                    + '   <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40" height="40"  alt=""/></div>'
 			       + '   <div class="item_right">'
-			       + '     <div class="msg">' + "自动回复" + myObj + '</div>'
+			       + '     <div class="msg">' + myObj + '</div>'
 			       + '     <div class="name_time">' + '小黄鸭' + ' · ' + myTime +'</div>'
 			       + '   </div>'
 			       + '</div>';
@@ -270,6 +309,19 @@ function sendToServer(name, msg){
 			       + '</div>';
             //$("#message_box").append(htmlData2);
             //$('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+
+               var jsondata = JSON.parse(myObj);
+               if ( jsondata.code == 201 || jsondata.code == 403) {
+                   var htmlData3 =   '<div class="msg_item fn-clear">'
+                   + '   <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40" height="40"  alt=""/></div>'
+			       + '   <div class="item_right">'
+			       + '     <div class="msg">' + "自动回复: " + jsondata.msg + '</div>'
+			       + '     <div class="name_time">' + '小黄鸭' + ' · ' + myTime +'</div>'
+			       + '   </div>'
+			       + '</div>';
+			   $("#message_box").append(htmlData3);
+               $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
+               }
         }
     }
     xmlhttp.open("POST", "/api/sendchat/" + msg , true);

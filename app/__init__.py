@@ -10,6 +10,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
 from flask_socketio import SocketIO
 from config import config
+from .tasks import Scheduler, keep_msg
+from flask_apscheduler import APScheduler  # 也可以使用该库来做定时任务
 
 
 login_manager = LoginManager()
@@ -18,6 +20,7 @@ login_manager.login_view = 'main.login'
 db = SQLAlchemy()
 bootstrap = Bootstrap()
 socketio = SocketIO()
+sch = Scheduler(86400, keep_msg)
 
 
 def create_app(config_name):
@@ -29,9 +32,13 @@ def create_app(config_name):
     login_manager.init_app(app)
     db.init_app(app)
     bootstrap.init_app(app)
+    sch.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
+
+    # from .chatbot import chatbot as chatbot_blueprint
+    # app.register_blueprint(chatbot_blueprint)
 
     return app
 

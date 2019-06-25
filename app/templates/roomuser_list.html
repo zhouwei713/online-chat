@@ -1,0 +1,63 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Flasky{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Flasky</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
+                {% else %}
+                <li><a href="{{ url_for('main.login') }}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div> {% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Hello, 这里是聊天室 {{ rname }} 所有的用户哦!</h1>
+    </div>
+    {% for user in ulist %}
+    <p>
+        <button class="btn btn-primary">{{ user }}</button>
+        {% if user in b_user %}
+        <span class="label label-default">禁言中。。。</span>
+        {% endif %}
+    </p>
+    <p>
+        <div class="btn-group">
+            <button type="button" class="btn btn-warning">禁言</button>
+            <button type="button" class="btn btn-warning dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                <span class="caret"></span>
+            </button>
+            <div class="dropdown-menu">
+                <li><a href="{{ url_for('main.block_roomuser', rname=rname, b_user=user, b_time=300)}}">5 Mins</a></li>
+                <li><a href="{{ url_for('main.block_roomuser', rname=rname, b_user=user, b_time=600)}}">10 Mins</a></li>
+                <li><a href="{{ url_for('main.block_roomuser', rname=rname, b_user=user, b_time=18000)}}">5 Hours</a></li>
+                <li><a href="{{ url_for('main.block_roomuser', rname=rname, b_user=user)}}">永久禁言</a></li>
+            </div>
+        </div>
+        <a href="{{ url_for('main.block_roomuser', rname=rname, b_user=user, b_time=1)}}" class="btn btn-info" role="button">解禁</a>
+        <a href="{{ url_for('main.kick_roomuser', rname=rname, del_user=user) }}" class="btn btn-danger" role="button">踢出</a>
+    </p>
+    {% endfor %}
+</div>
+{% endblock %}
