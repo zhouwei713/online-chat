@@ -13,6 +13,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     SECRET_KEY = 'hardtohard'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'chat.sqlite3')
+    EXPARE_TIME = 604800  # 7 天
+    JOBS = []
 
     @staticmethod
     def init_app(app):

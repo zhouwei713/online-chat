@@ -5,7 +5,7 @@
 """
 
 
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, current_app
 from flask_login import login_required, login_user, logout_user, current_user
 from . import main
 from .. import db
@@ -13,14 +13,16 @@ from .forms import LoginForm, CreateUserForm, CreatePerForm, EditUserForm
 from ..models import User, Permission, RelUserPermission
 import time
 import json
-import redis
 from ..socket_conn import socket_send
 import hashlib
+from ..redis_conn import redis_conn_pool
+import requests
 
 
-pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
-                            decode_responses=True, password='pkAWNdYWfbLLfNOfxTJinm9SO16eSJFx')
-r = redis.Redis(connection_pool=pool)
+# pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
+#                             decode_responses=True, password='pkAWNdYWfbLLfNOfxTJinm9SO16eSJFx')
+# r = redis.Redis(connection_pool=pool)
+r = redis_conn_pool()
 
 
 @main.route('/adddb/', methods=['GET', 'POST'])
@@ -166,28 +168,78 @@ def join_chat_room():
 @main.route('/chat/', methods=['GET', 'POST'])
 def chat():
     rname = request.args.get('rname', "")
+    b_user = r.keys('b_user-*')
+    b_user_list = []
+    for b in b_user:
+        b_user_list.append(r.get(b))
     ulist = r.zrange("chat-" + rname, 0, -1)
     messages = r.zrange("msg-" + rname, 0, -1, withscores=True)
     msg_list = []
     for i in messages:
         msg_list.append([json.loads(i[0]), time.strftime("%Y/%m/%d %p%H:%M:%S", time.localtime(i[1]))])
     if current_user.is_authenticated:
-        return render_template('chat.html', rname=rname, user_list=ulist, msg_list=msg_list)
+        return render_template('chat.html', rname=rname, user_list=ulist, msg_list=msg_list,
+                               b_user_list=b_user_list)
     else:
         email = "youke" + "@hihichat.com"
         hash = hashlib.md5(email.encode('utf-8')).hexdigest()
         gravatar_url = 'http://www.gravatar.com/avatar/' + hash + '?s=40&d=identicon&r=g'
-        return render_template('chat.html', rname=rname, user_list=ulist,
-                               msg_list=msg_list, g=gravatar_url)
+        return render_template('chat.html', rname=rname, g=gravatar_url)
 
 
 @main.route('/api/sendchat/<info>', methods=['GET', 'POST'])
 def send_chat(info):
     if current_user.is_authenticated:
+        b_user = r.exists('b_user-%s' % current_user.username)
+        if b_user:
+            data = json.dumps({'code': 201, 'msg': 'Your are under block now!'})
+            return data
         rname = request.form.get("rname", "")
-        body = {"username": current_user.username, "msg": info}
-        r.zadd("msg-" + rname, json.dumps(body), time.time())
-        socket_send(info, current_user.username)
-        return info
+        ulist = r.zrange("chat-" + rname, 0, -1)
+        if current_user.username in ulist:
+            body = {"username": current_user.username, "msg": info}
+            r.zadd("msg-" + rname, json.dumps(body), time.time())
+            socket_send(info, current_user.username)
+            data = json.dumps({'code': 200, 'msg': info})
+            return data
+        else:
+            data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
+            return data
     else:
-        return info
+        base_url = 'http://luobodazahui.top:8889/api/chat/'
+        chat_text = requests.get(base_url + info).text
+        return chat_text
+
+
+@main.route('/chat/roomuser/list', methods=['GET', 'POST'])
+@login_required
+def room_user_list():
+    rname = request.args.get('rname', "")
+    ulist = r.zrange("chat-" + rname, 0, -1)
+    b_user = r.keys('b_user-*')
+    b_user_list = []
+    for b in b_user:
+        b_user_list.append(r.get(b))
+    return render_template('roomuser_list.html', ulist=ulist, rname=rname, b_user=b_user_list)
+
+
+@main.route('/chat/block/roomuser/', methods=['GET', 'POST'])
+@login_required
+def block_roomuser():
+    rname = request.args.get('rname', "")
+    new_b_user = request.args.get('b_user', "")
+    b_time = request.args.get('b_time', "")
+    if b_time is "":
+        r.set('b_user-' + new_b_user, new_b_user, ex=None)
+    else:
+        r.set('b_user-' + new_b_user, new_b_user, ex=b_time)
+    return redirect(url_for('main.room_user_list', rname=rname))
+
+
+@main.route('/chat/kick/roomuser/', methods=['GET', 'POST'])
+@login_required
+def kick_roomuser():
+    rname = request.args.get("rname", "")
+    del_user = request.args.get("del_user", "")
+    r.zrem("chat-" + rname, del_user)
+    return redirect(url_for('main.room_user_list', rname=rname))
