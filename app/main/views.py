@@ -17,6 +17,7 @@ from ..socket_conn import socket_send
 import hashlib
 from ..redis_conn import redis_conn_pool
 import requests
+from ..chatbot.views import get_bot_text
 
 
 # pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
@@ -147,6 +148,7 @@ def chat_room_list():
 def create_room():
     rname = request.form.get('chatroomname', '')
     if r.exists("chat-" + rname) is False:
+        r.zadd("chat-" + rname, 'hi-user', time.time())
         r.zadd("chat-" + rname, current_user.username, 1)
         return redirect(url_for('main.chat', rname=rname))
     else:
@@ -206,8 +208,9 @@ def send_chat(info):
             data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
             return data
     else:
-        base_url = 'http://luobodazahui.top:8889/api/chat/'
-        chat_text = requests.get(base_url + info).text
+        # base_url = 'http://luobodazahui.top:8889/api/chat/'
+        # chat_text = requests.get(base_url + info).text
+        chat_text = get_bot_text(info)
         return chat_text
 
 

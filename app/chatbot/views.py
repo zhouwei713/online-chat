@@ -30,3 +30,9 @@ def get_bot_response():
 def get_bot_api(text):
     res = str(bot.get_response(text))
     return jsonify(res), 200
+
+
+def get_bot_text(text):
+    res = str(bot.get_response(text))
+    return res
+

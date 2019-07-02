@@ -1,0 +1,8 @@
+Flask==1.0.2
+Flask-Login==0.4.1
+Flask_SQLAlchemy==2.3.2
+Flask_Bootstrap==3.3.7.1
+Flask_SocketIO==4.1.0
+redis==2.10.6
+WTForms==2.1
+Flask-WTF==0.14.2

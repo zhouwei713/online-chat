@@ -331,7 +331,7 @@ function sendToServer(name, msg){
 };
 
 //websocket
-var websocket_url = 'http://' + document.domain + ':' + location.port + '/testnamespace';
+var websocket_url = 'ws://' + document.domain + ':' + location.port + '/testnamespace';
 var socket = io.connect(websocket_url);
 //发送消息
 //console.log({{rname}});
