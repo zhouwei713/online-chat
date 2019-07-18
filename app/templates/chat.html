@@ -7,7 +7,8 @@
 <title>Hi Hi 聊天室</title>
 <link rel="shortcut icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}">
 <link rel="icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}" type="image/x-icon">
-<link type="text/css" rel="stylesheet" href="/static/chat/css/style.css">
+<link  id="css" type="text/css" rel="stylesheet" href="/static/chat/css/style.css">
+    <!--<link type="text/css" rel="stylesheet" href="/static/chat/css/style-contorl.css">-->
 <script type="text/javascript" src="{{ url_for('static', filename='chat/js/jquery.min.js') }}"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js"></script>　
@@ -18,7 +19,12 @@
 <h1>ROOM: {{ rname }}</h1>
 <div class="chatbox">
   <div class="chat_top fn-clear">
-      <div class="uinfo fn-clear"  style="float: left;"><div class="uface"><h1 style="color: #7777"></h1></div></div>
+      <div class="uinfo fn-clear"  style="float: left;">
+          <div class="uface">
+              <h1 style="color: #7777"><a href="/">Home</a>
+              </h1>
+          </div>
+      </div>
     <div class="uinfo fn-clear">
     {% if current_user.is_authenticated %}
       <div class="uface"><img src="{{ current_user.gravatar(size=40) }}" width="40" height="40"  alt=""/></div>
@@ -35,7 +41,8 @@
         <ul class="managerbox">
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('main.room_user_list', rname=rname) }}" target="_blank"><i class="fontico lock"></i>管理用户</a></li>
-          <li><a href="{{ url_for('main.logout', rname=rname) }}"><i class="fontico lock"></i>退出登陆</a></li>
+            <li><span id="control" onclick="setBg()">&ensp;<i class="fontico lock"></i>&ensp;&ensp;切换背景</span></li>
+          <li><a href="{{ url_for('main.logout', rname=rname) }}"><i class="fontico logout"></i>退出登陆</a></li>
             <li><a href="{{ url_for('main.logout') }}"><i class="fontico lock"></i>退出房间</a></li>
             {% else %}
           <li><a href="{{ url_for('main.login') }}"><i class="fontico logout"></i>登录</a></li>
@@ -158,6 +165,20 @@
   </div>
 </div>
 <script type="text/javascript">
+function setBg() {
+    var host = window.location.host;
+    var protocol = window.location.protocol;
+    var css_href = document.getElementById('css').href;
+    var css_url = protocol + "//" + host + "/static/chat/css/style-contorl.css";
+    console.log(css_url);
+    //console.log("css url", css_href);
+    if(css_href == css_url){
+        document.getElementById('css').href='/static/chat/css/style.css'
+    }else{
+        document.getElementById('css').href='/static/chat/css/style-contorl.css'
+    }
+    }
+
 $(document).ready(function(e) {
 	$('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
 	$('.uname').hover(

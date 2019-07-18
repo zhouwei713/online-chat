@@ -17,7 +17,7 @@ from ..socket_conn import socket_send
 import hashlib
 from ..redis_conn import redis_conn_pool
 import requests
-from ..chatbot.views import get_bot_text
+# from ..chatbot.views import get_bot_text
 
 
 # pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
@@ -94,13 +94,22 @@ def edituser(id):
 
 @main.route('/login/', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is not None and user.verify_password(form.password.data):
+    return render_template('login.html')
+
+
+@main.route('/login_check', methods=['POST'])
+def login_check():
+    username = request.form.get('Username', '')
+    password = request.form.get('Password', '')
+    user = User.query.filter_by(username=username).first()
+    if request.method == 'POST':
+        if user is not None and user.verify_password(password):
             login_user(user)
-            return redirect(url_for('main.index'))
-    return render_template('login.html', form=form)
+            return "success"
+        else:
+            return "error"
+    elif request.method == 'GET':
+        return render_template('login.html')
 
 
 @main.route('/logout/')

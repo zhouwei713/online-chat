@@ -1,41 +1,75 @@
-{% extends "bootstrap/base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+<title>hi hi 聊天室</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ 
+<!-- Custom Theme files -->
+<link href="/static/auth/css/font-awesome.min.css" rel="stylesheet" type="text/css" media="all">
+<link href="/static/auth/css/snow.css" rel="stylesheet" type="text/css" media="all" />
+<link href="/static/auth/css/style.css" rel="stylesheet" type="text/css" media="all" />
+<link rel="shortcut icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}">
+<link rel="icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}" type="image/x-icon">
+<!-- //Custom Theme files -->
 
-{% block title %}Flasky{% endblock %}
+</head>
+<body>
+<div class="snow-container">
+			  <div class="snow foreground"></div>
+			  <div class="snow foreground layered"></div>
+			  <div class="snow middleground"></div>
+			  <div class="snow middleground layered"></div>
+			  <div class="snow background"></div>
+			  <div class="snow background layered"></div>
+			</div>
 
-{% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Flasky</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-                <li><a href="{{ url_for('main.chat_room_list') }}">Room List</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
-                {% else %}
-                <li><a href="{{ url_for('main.login') }}">Login</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</div> {% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="page-header">
-        <h1>Hello, Welcome!</h1>
-    </div>
-    {{ wtf.quick_form(form) }}
+<div class="top-buttons-agileinfo">
+<!--<a href="index.html"  class="active">登录</a><a href="signup.html">注册</a>-->
 </div>
-{% endblock %}
+<h1>欢迎来到 hi hi 聊天室</h1>
+<div class="main-agileits">
+<!--form-stars-here-->
+		<div class="form-w3-agile">
+			<h2 class="sub-agileits-w3layouts">登录系统</h2>
+			<!--<form action="{{ url_for('main.login') }}" method="post">-->
+			<form id="login" method="post">
+					<input type="text" id="Username" placeholder="Username" required="" />
+					<input type="password" id="Password" placeholder="Password" required="" />
+					<a href="#" class="forgot-w3layouts">忘记密码 ?</a>
+				<div class="submit-w3l">
+                    <input type="button" value="登录" onclick="myLogin()" class="submit-button">
+				</div>
+				<p class="p-bottom-w3ls"><a href="{{ url_for('main.login') }}">这里注册</a>如果你还没有一个账号.</p>
+			</form>
+		</div>
+		</div>
+<!--//form-ends-here-->
+<script type="text/javascript" src="/static/auth/js/jquery-2.1.4.min.js"></script>
+<script>
+	function myLogin(){
+    var data = {};
+    data['Username'] = $("#Username").val();
+    data['Password'] = $("#Password").val();
+    $.ajax(
+        {
+           type:'POST',
+           url: '{{ url_for('main.login_check') }}',
+           data: data,
+           success:function (data) {
+               if ( data == 'error' ){
+                     alert("Invalid username or password.");
+               }else if (data == 'success'){
+                   window.location.href="{{ url_for('main.index') }}";
+               }
+           },
+           error:function (xhr, type) {
+
+           }
+        }
+    );
+}
+</script>
+</body>
+</html>
