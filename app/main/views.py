@@ -17,7 +17,7 @@ from ..socket_conn import socket_send
 import hashlib
 from ..redis_conn import redis_conn_pool
 import requests
-# from ..chatbot.views import get_bot_text
+from ..chatbot.views import get_bot_text
 
 
 # pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
