@@ -12,13 +12,13 @@
     </div>
   {% if can_create %}
   <form action="{{ url_for('main.create_room') }}" method="POST" class="comment-form">
-         <div class="form-group comment-form-author">
-        <label for="chatroomname">Chat Room Name <span class="required">*</span></label>
-        <input class="form-control" id="chatroomname" name="chatroomname" type="text" value="" size="30" aria-required='true' />
+        <div class="form-group comment-form-author">
+            <label for="chatroomname">Chat Room Name <span class="required">*</span></label>
+            <input class="form-control" id="chatroomname" name="chatroomname" type="text" value="" size="30" aria-required='true' />
         </div>
         <div class="form-group comment-form-comment">
-        <label for="description">Chat Room Description <span class="required">*</span></label>
-        <textarea class="form-control" id="description" name="description" cols="45" rows="6"></textarea>
+            <label for="description">Chat Room Description <span class="required">*</span></label>
+            <textarea class="form-control" id="description" name="description" cols="45" rows="6"></textarea>
         </div>
         <button  name="submit" type="submit" id="submit" class="btn btn-primary" value="Submit Comment">Create Room</button>
   </form>

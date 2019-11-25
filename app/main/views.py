@@ -17,7 +17,7 @@ from ..socket_conn import socket_send
 import hashlib
 from ..redis_conn import redis_conn_pool
 import requests
-from ..chatbot.views import get_bot_text
+# from ..chatbot.views import get_bot_text
 
 
 # pool = redis.ConnectionPool(host='redis-12143.c8.us-east-1-3.ec2.cloud.redislabs.com', port=12143,
@@ -154,14 +154,23 @@ def chat_room_list():
 
 @main.route('/createroom/', methods=["GET", 'POST'])
 @login_required
-def create_room():
-    rname = request.form.get('chatroomname', '')
-    if r.exists("chat-" + rname) is False:
-        r.zadd("chat-" + rname, 'hi-user', time.time())
-        r.zadd("chat-" + rname, current_user.username, 1)
-        return redirect(url_for('main.chat', rname=rname))
+def create_room(chatwith=None):
+    if chatwith:
+        rname = chatwith
+        if r.exists("chat-" + rname) is False:
+            r.zadd("chat-" + rname, current_user.username, 1)
+            r.zadd("chat-" + rname, chatwith, 2)
+            return redirect(url_for('main.private_chat', rname=rname))
+        else:
+            return redirect(url_for('main.chat_room_list'))
     else:
-        return redirect(url_for('main.chat_room_list'))
+        rname = request.form.get('chatroomname', '')
+        if r.exists("chat-" + rname) is False:
+            r.zadd("chat-" + rname, 'hi-user', time.time())
+            r.zadd("chat-" + rname, current_user.username, 1)
+            return redirect(url_for('main.chat', rname=rname))
+        else:
+            return redirect(url_for('main.chat_room_list'))
 
 
 @main.route('/joinroom/', methods=["GET", 'POST'])
@@ -176,6 +185,7 @@ def join_chat_room():
     return redirect(url_for('main.chat', rname=rname))
 
 
+# 群聊天室
 @main.route('/chat/', methods=['GET', 'POST'])
 def chat():
     rname = request.args.get('rname', "")
@@ -196,6 +206,30 @@ def chat():
         hash = hashlib.md5(email.encode('utf-8')).hexdigest()
         gravatar_url = 'http://www.gravatar.com/avatar/' + hash + '?s=40&d=identicon&r=g'
         return render_template('chat.html', rname=rname, g=gravatar_url)
+
+
+# 私聊功能
+@main.route('/privatechat/', methods=['GET', 'POST'])
+def private_chat():
+    # 后面可以增加私聊权限
+    user_right = True
+    if user_right:
+        uname = request.args.get('to', "")
+        create_room(uname)
+        ulist = r.zrange("chat-" + uname, 0, -1)
+        messages = r.zrange("msg-" + uname, 0, -1, withscores=True)
+        msg_list = []
+        for i in messages:
+            msg_list.append([json.loads(i[0]), time.strftime("%Y/%m/%d %p%H:%M:%S", time.localtime(i[1]))])
+        if current_user.is_authenticated:
+            return render_template('privatechat.html', rname=uname, user_list=ulist, msg_list=msg_list)
+        else:
+            email = "youke" + "@hihichat.com"
+            hash = hashlib.md5(email.encode('utf-8')).hexdigest()
+            gravatar_url = 'http://www.gravatar.com/avatar/' + hash + '?s=40&d=identicon&r=g'
+            return render_template('privatechat.html', rname=uname, g=gravatar_url)
+    else:
+        pass
 
 
 @main.route('/api/sendchat/<info>', methods=['GET', 'POST'])

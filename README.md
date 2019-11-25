@@ -1,6 +1,6 @@
 # online-chat
 本项目是一个在线的 IM 系统，打开网页即用，非常方便，项目采用 Flask 搭建。
->这里先给出 Demo 地址，[http://106.13.2.228/](http://106.13.2.228/)   
+>这里先给出 Demo 地址，[https://www.luobodazahui.top](https://www.luobodazahui.top)   
 
 # tips
 由于本人水平、时间有限，很多辅助功能还没有完成，比如用户管理，权限管理，页面布局等等。项目后续会持续更新，

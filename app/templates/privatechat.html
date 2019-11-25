@@ -16,7 +16,7 @@
 {% endblock %}
 {% block content %}
 <body>
-<h1>ROOM: {{ rname }}</h1>
+<h1>ROOM: Chat With {{ rname }}</h1>
 <div class="chatbox">
   <div class="chat_top fn-clear">
       <div class="uinfo fn-clear"  style="float: left;">
@@ -65,7 +65,7 @@
         <div class="msg_item fn-clear">
           <div class="uface"><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="40" height="40"  alt=""/></div>
           <div class="item_right">
-            <div class="msg">Welcome to Hihi Chat Room. 欢迎来到 Hihi 聊天室。 </div>
+            <div class="msg">Welcome to Hihi Chat Room. 你们可以愉快的私聊啦。 </div>
             <div class="name_time">小黄鸭 </div>
           </div>
         </div>
@@ -123,8 +123,6 @@
     <div class="chat_right">
       <ul class="user_list" title="">
         <li class="fn-clear selected"><em id="all">所有用户</em></li>
-        <li class="fn-clear" data-id="1"><span><img src="{{ url_for('static', filename='chat/images/hi.jpg')}}" width="30" height="30"  alt=""/></span><em>小HI</em><small class="online" title="在线"></small></li>
-        <li class="fn-clear" data-id="2"><span><img src="{{ url_for('static', filename='chat/images/duck.jpg')}}" width="30" height="30"  alt=""/></span><em>小黄鸭</em><small class="online" title="在线"></small></li>
           {% if current_user.is_authenticated %}
           {% for i in user_list %}
           {% if i == current_user.username %}
@@ -194,38 +192,6 @@ $(document).ready(function(e) {
 	var fromname = $('#fromname').val();
 	var to_uid   = 0; // 默认为0,表示发送给所有用户
 	var to_uname = '';
-	$('.user_list > li').dblclick(function(){
-		to_uname = $(this).find('em').text();
-		to_uid   = $(this).attr('data-id');
-        var redirect_url = 'http://' + document.domain + ':' + location.port + '/privatechat/?to=' + to_uname;
-		if(to_uname == fromname){
-		    alert('您不能和自己聊天!');
-			return false;
-		}
-		if(to_uname == '所有用户'){
-		    $("#toname").val('');
-			$('#chat_type').text('群聊');
-		}else{
-		    // 新开窗口私聊
-		    window.open(redirect_url);
-		    // 在当前页面私聊
-		    // $("#toname").val(to_uid);
-			// $('#chat_type').text('您正和 ' + to_uname + ' 聊天');
-		}
-		$(this).addClass('selected').siblings().removeClass('selected');
-		// 在当前页面私聊
-	    // $('#message').focus().attr("placeholder", "您对"+to_uname+"说：");
-	    // $('#message_not').focus().attr("placeholder", "您对"+to_uname+"说：");
-	});
-
-	/* 右键菜单 */
-	/*
-	$('.user_list > li').mousedown(function(e){
-	    if (3 == e.which){
-	        alert('thisis ');
-	    }
-	});
-	*/
 
     /*用户未登陆的用户点击提交按钮发送消息按钮*/
 	$('#sub_but').click(function(event){

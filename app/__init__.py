@@ -11,7 +11,7 @@ from flask_bootstrap import Bootstrap
 from flask_socketio import SocketIO
 from config import config
 from .tasks import Scheduler, keep_msg
-from flask_apscheduler import APScheduler  # 也可以使用该库来做定时任务
+# from flask_apscheduler import APScheduler  # 也可以使用该库来做定时任务
 
 
 login_manager = LoginManager()
