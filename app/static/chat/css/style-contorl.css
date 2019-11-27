@@ -107,7 +107,8 @@ i.logout:before{ content:'\e804';}
 .chat_message{ height:-moz-calc(100% - 61px); height:-webkit-calc(100% - 61px); height:calc(100% - 61px);}
 
 /*chat_left*/
-.chat_left{ padding:20px; width:-moz-calc(100% - 240px); width:-webkit-calc(100% - 240px); width:calc(100% - 240px); height:-moz-calc(100% - 40px); height:-webkit-calc(100% - 40px); height:calc(100% - 40px); float:left;}
+/*.chat_left{ padding:20px; width:-moz-calc(100% - 240px); width:-webkit-calc(100% - 240px); width:calc(100% - 240px); height:-moz-calc(100% - 40px); height:-webkit-calc(100% - 40px); height:calc(100% - 40px); float:left;}*/
+.chat_left{ padding:20px; width:-moz-calc(100% - 440px); width:-webkit-calc(100% - 440px); width:calc(100% - 440px); height:-moz-calc(100% - 40px); height:-webkit-calc(100% - 40px); height:calc(100% - 40px); float:left;}
 .message_box{ background-color:#FFF; margin-bottom:20px; height:-moz-calc(100% - 120px); height:-webkit-calc(100% - 120px); height:calc(100% - 120px); overflow:auto;}
 .msg_item{ margin-bottom:20px; position:relative;}
 .msg_item .uface{ position:absolute; bottom:0px;}
@@ -145,6 +146,15 @@ small.online{ background-color:#57B869;}
 small.offline{ background-color:#EB3E3E;}
 .user_list li img{ -moz-border-radius:50%; -webkit-border-radius:50%; border-radius:50%; vertical-align:middle;}
 
+/*chat_pleft*/
+.chat_pleft{ width:199px; height:100%; float:left; border-right: 1px solid #eee;}
+.puser_list{ padding:0; overflow:auto; height:100%;}
+.puser_list li{ padding:10px 20px; color:#2E4059; cursor:pointer;}
+.puser_list li:hover,.user_list li.selected{ background-color:#F4F6F8;}
+.puser_list li span{ display:block; float:left; width:30px; height:30px; margin-right:10px;}
+.puser_list li em{ display:block; float:left; height:30px; line-height:30px;}
+.puser_list li small{ width:10px; height:10px; margin:10px; float:left; -moz-border-radius:50%; -webkit-border-radius:50%; border-radius:50%;}
+.puser_list li img{ -moz-border-radius:50%; -webkit-border-radius:50%; border-radius:50%; vertical-align:middle;}
 
 /*expression - 表情,有待增加*/
 .expression{ float:left;}

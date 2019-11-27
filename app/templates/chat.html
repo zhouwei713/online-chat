@@ -8,6 +8,7 @@
 <link rel="shortcut icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}">
 <link rel="icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}" type="image/x-icon">
 <link  id="css" type="text/css" rel="stylesheet" href="/static/chat/css/style.css">
+<link  id="stylecss" type="text/css" rel="stylesheet" href="/static/chat/css/style_button.css">
     <!--<link type="text/css" rel="stylesheet" href="/static/chat/css/style-contorl.css">-->
 <script type="text/javascript" src="{{ url_for('static', filename='chat/js/jquery.min.js') }}"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
@@ -38,7 +39,7 @@
           游客
           {% endif %}
           <i class="fontico down"></i>
-        <ul class="managerbox">
+          <ul class="managerbox">
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('main.room_user_list', rname=rname) }}" target="_blank"><i class="fontico lock"></i>管理用户</a></li>
             <li><span id="control" onclick="setBg()">&ensp;<i class="fontico lock"></i>&ensp;&ensp;切换背景</span></li>
@@ -47,7 +48,7 @@
             {% else %}
           <li><a href="{{ url_for('main.login') }}"><i class="fontico logout"></i>登录</a></li>
             {% endif %}
-        </ul>
+          </ul>
       </div>
     </div>
   </div>
@@ -120,6 +121,12 @@
         </div>
       </div>
     </div>
+      <div class="chat_pleft">
+          <ul class="puser_list" title="" id="pchat">
+              <li class="fn-clear selected"><em id="pall">所有私聊</em></li>
+              <li class="fn-clear" data-id="112" id="private"><span></span><em>暂时没有任何私聊</em></li>
+          </ul>
+      </div>
     <div class="chat_right">
       <ul class="user_list" title="">
         <li class="fn-clear selected"><em id="all">所有用户</em></li>
@@ -181,6 +188,23 @@ function setBg() {
     }
 
 $(document).ready(function(e) {
+    // 定时更新私聊列表
+    setInterval(function() {
+        $.get("http://127.0.0.1:8889/api/pchat/" + "{{ current_user.username }}",//GET请求的url地址
+        function(data,status){
+            var roomlist = JSON.parse(data);
+            // var private_html1 = '<li class="fn-clear" id="private"><p>';
+            // var private_html2 = '</p></li>';
+            var li_html = '<li class="fn-clear selected"><em id="pall">所有私聊</em></li>';
+            for (var i =0; i<roomlist.length; i++) {
+                li_html += roomlist[i];
+                //$("#private").html(private_html1 + roomlist[i] + private_html2);//更新列表内容
+            }
+            console.log(li_html);
+            $("#pchat").html(li_html);//更新列表内容
+          });
+        }, 5000); //定时刷新界面（0.5秒）
+
 	$('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
 	$('.uname').hover(
 	    function(){
@@ -191,6 +215,7 @@ $(document).ready(function(e) {
 		}
 	);
 
+	// 用户列表操作
 	var fromname = $('#fromname').val();
 	var to_uid   = 0; // 默认为0,表示发送给所有用户
 	var to_uname = '';
@@ -198,6 +223,7 @@ $(document).ready(function(e) {
 		to_uname = $(this).find('em').text();
 		to_uid   = $(this).attr('data-id');
         var redirect_url = 'http://' + document.domain + ':' + location.port + '/privatechat/?to=' + to_uname;
+        var room_url = 'http://' + document.domain + ':' + location.port + '/joinroom/';
 		if(to_uname == fromname){
 		    alert('您不能和自己聊天!');
 			return false;
@@ -255,6 +281,13 @@ $(document).ready(function(e) {
 		}
 	});
 });
+
+function pchat(id){
+        var to_user = id;
+        var redirect_url = 'http://' + document.domain + ':' + location.port + '/privatechat/?to=' + to_user;
+        window.open(redirect_url);
+    }
+
 function sendMessage(event, from_name, to_uid, to_uname){
     var msg = $("#message_not").val();
 	var myDate = new Date();
@@ -350,12 +383,12 @@ function sendToServer(name, msg){
                $('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
                }
         }
-    }
+    };
     xmlhttp.open("POST", "/api/sendchat/" + msg , true);
     xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 	xmlhttp.send("rname=" + myRname);
 
-};
+}
 
 //websocket
 var websocket_url = 'ws://' + document.domain + ':' + location.port + '/testnamespace';
@@ -372,7 +405,6 @@ socket.on('response',function(data){
     var msg = data.msg;
     var username = data.username;
     var currentuser = '{{ current_user.username }}';
-    //console.log(currentuser);
     var hash = md5(username + "@hihichat.com");
     if ( currentuser == username )
     {

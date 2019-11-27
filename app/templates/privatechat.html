@@ -120,6 +120,12 @@
         </div>
       </div>
     </div>
+      <div class="chat_pleft">
+          <ul class="puser_list" title="" id="pchat">
+              <li class="fn-clear selected"><em id="pall">所有私聊</em></li>
+              <li class="fn-clear" data-id="112" id="private"><span></span><em>暂时没有任何私聊</em></li>
+          </ul>
+      </div>
     <div class="chat_right">
       <ul class="user_list" title="">
         <li class="fn-clear selected"><em id="all">所有用户</em></li>
@@ -179,6 +185,20 @@ function setBg() {
     }
 
 $(document).ready(function(e) {
+    // 定时更新私聊列表
+    setInterval(function() {
+        $.get("http://127.0.0.1:8889/api/pchat/" + "{{ current_user.username }}",//GET请求的url地址
+        function(data,status){
+            var roomlist = JSON.parse(data);
+            var li_html = '<li class="fn-clear selected"><em id="pall">所有私聊</em></li>';
+            for (var i =0; i<roomlist.length; i++) {
+                li_html += roomlist[i];
+            }
+            console.log(li_html);
+            $("#pchat").html(li_html);//更新列表内容
+          });
+        }, 5000); //定时刷新界面（0.5秒）
+
 	$('#message_box').scrollTop($("#message_box")[0].scrollHeight + 20);
 	$('.uname').hover(
 	    function(){
@@ -221,6 +241,13 @@ $(document).ready(function(e) {
 		}
 	});
 });
+
+function pchat(id){
+        var to_user = id;
+        var redirect_url = 'http://' + document.domain + ':' + location.port + '/privatechat/?to=' + to_user;
+        window.open(redirect_url);
+    }
+
 function sendMessage(event, from_name, to_uid, to_uname){
     var msg = $("#message_not").val();
 	var myDate = new Date();
@@ -261,7 +288,7 @@ function sendToServernoLogin(name, msg){
     }
     xmlhttp.open("POST", "/api/sendchat/" + msg , true);
     xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-	xmlhttp.send("rname=" + myRname);
+	xmlhttp.send("rname=" + myRname + "&rtype=" + 'p');
 
 };
 
@@ -319,7 +346,7 @@ function sendToServer(name, msg){
     }
     xmlhttp.open("POST", "/api/sendchat/" + msg , true);
     xmlhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-	xmlhttp.send("rname=" + myRname);
+	xmlhttp.send("rname=" + myRname + "&rtype=" + 'p');
 
 };
 

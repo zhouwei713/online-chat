@@ -157,12 +157,9 @@ def chat_room_list():
 def create_room(chatwith=None):
     if chatwith:
         rname = chatwith
-        if r.exists("chat-" + rname) is False:
-            r.zadd("chat-" + rname, current_user.username, 1)
-            r.zadd("chat-" + rname, chatwith, 2)
-            return redirect(url_for('main.private_chat', rname=rname))
-        else:
-            return redirect(url_for('main.chat_room_list'))
+        if r.exists("pchat-" + rname + '-' + current_user.username) is False:
+            r.zadd("pchat-" + rname + '-' + current_user.username, current_user.username, 1)
+            r.zadd("pchat-" + rname + '-' + current_user.username, rname, 2)
     else:
         rname = request.form.get('chatroomname', '')
         if r.exists("chat-" + rname) is False:
@@ -215,9 +212,10 @@ def private_chat():
     user_right = True
     if user_right:
         uname = request.args.get('to', "")
-        create_room(uname)
-        ulist = r.zrange("chat-" + uname, 0, -1)
-        messages = r.zrange("msg-" + uname, 0, -1, withscores=True)
+        create_room(chatwith=uname)
+        ulist = r.zrange("pchat-" + uname + '-' + current_user.username, 0, -1)
+        messages = r.zrange("pmsg-" + uname + '-' + current_user.username, 0, -1, withscores=True)
+        print(messages)
         msg_list = []
         for i in messages:
             msg_list.append([json.loads(i[0]), time.strftime("%Y/%m/%d %p%H:%M:%S", time.localtime(i[1]))])
@@ -232,6 +230,22 @@ def private_chat():
         pass
 
 
+# 获取个人私聊信息
+@main.route('/api/pchat/<user>', methods=['GET', 'POST'])
+def pchat_info(user):
+    pchat = r.keys(pattern='pchat-*')
+    pchatlist = []
+    for i in pchat:
+        i_str = str(i)
+        user1 = i_str.split('-', 2)[1]
+        if user in i_str:
+            pchatlist.append({user1: i_str})
+    html = []
+    for i in pchatlist:
+        html.append(f'<li class="fn-clear"><em id="{list(i.keys())[0]}" onclick="pchat(this.id)">{list(i.values())[0]}</em></li>')
+    return json.dumps(html)
+
+
 @main.route('/api/sendchat/<info>', methods=['GET', 'POST'])
 def send_chat(info):
     if current_user.is_authenticated:
@@ -240,16 +254,30 @@ def send_chat(info):
             data = json.dumps({'code': 201, 'msg': 'Your are under block now!'})
             return data
         rname = request.form.get("rname", "")
-        ulist = r.zrange("chat-" + rname, 0, -1)
-        if current_user.username in ulist:
-            body = {"username": current_user.username, "msg": info}
-            r.zadd("msg-" + rname, json.dumps(body), time.time())
-            socket_send(info, current_user.username)
-            data = json.dumps({'code': 200, 'msg': info})
-            return data
+        rtype = request.form.get("rtype", "")
+        if rtype and rtype == 'p':
+            ulist = r.zrange("pchat-" + rname + '-' + current_user.username, 0, -1)
+            if current_user.username in ulist:
+                body = {"username": current_user.username, "msg": info}
+                r.zadd("pmsg-" + rname + '-' + current_user.username, json.dumps(body), time.time())
+                socket_send(info, current_user.username)
+                data = json.dumps({'code': 200, 'msg': info})
+                return data
+            else:
+                print("hereeeeee")
+                data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
+                return data
         else:
-            data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
-            return data
+            ulist = r.zrange("chat-" + rname, 0, -1)
+            if current_user.username in ulist:
+                body = {"username": current_user.username, "msg": info}
+                r.zadd("msg-" + rname, json.dumps(body), time.time())
+                socket_send(info, current_user.username)
+                data = json.dumps({'code': 200, 'msg': info})
+                return data
+            else:
+                data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
+                return data
     else:
         # base_url = 'http://luobodazahui.top:8889/api/chat/'
         # chat_text = requests.get(base_url + info).text

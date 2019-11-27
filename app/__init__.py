@@ -19,7 +19,8 @@ login_manager.session_protection = 'strong'
 login_manager.login_view = 'main.login'
 db = SQLAlchemy()
 bootstrap = Bootstrap()
-socketio = SocketIO()
+socketio = SocketIO(async_mode='threading')  # 这里需要增加 async_mode 配置，否则在Windows上无法正常启动
+# https://github.com/NetEaseGame/git-webhook/issues/23
 sch = Scheduler(86400, keep_msg)
 
 
