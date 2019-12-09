@@ -8,7 +8,6 @@
 <link rel="shortcut icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}">
 <link rel="icon" href="{{ url_for('static',filename='chat/images/hihi.jpg')}}" type="image/x-icon">
 <link  id="css" type="text/css" rel="stylesheet" href="/static/chat/css/style.css">
-<link  id="stylecss" type="text/css" rel="stylesheet" href="/static/chat/css/style_button.css">
     <!--<link type="text/css" rel="stylesheet" href="/static/chat/css/style-contorl.css">-->
 <script type="text/javascript" src="{{ url_for('static', filename='chat/js/jquery.min.js') }}"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
@@ -223,7 +222,7 @@ $(document).ready(function(e) {
 		to_uname = $(this).find('em').text();
 		to_uid   = $(this).attr('data-id');
         var redirect_url = 'http://' + document.domain + ':' + location.port + '/privatechat/?to=' + to_uname;
-        var room_url = 'http://' + document.domain + ':' + location.port + '/joinroom/';
+        // var room_url = 'http://' + document.domain + ':' + location.port + '/joinroom/';
 		if(to_uname == fromname){
 		    alert('您不能和自己聊天!');
 			return false;

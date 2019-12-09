@@ -207,6 +207,7 @@ def chat():
 
 # 私聊功能
 @main.route('/privatechat/', methods=['GET', 'POST'])
+@login_required
 def private_chat():
     # 后面可以增加私聊权限
     user_right = True
@@ -215,17 +216,10 @@ def private_chat():
         create_room(chatwith=uname)
         ulist = r.zrange("pchat-" + uname + '-' + current_user.username, 0, -1)
         messages = r.zrange("pmsg-" + uname + '-' + current_user.username, 0, -1, withscores=True)
-        print(messages)
         msg_list = []
         for i in messages:
             msg_list.append([json.loads(i[0]), time.strftime("%Y/%m/%d %p%H:%M:%S", time.localtime(i[1]))])
-        if current_user.is_authenticated:
-            return render_template('privatechat.html', rname=uname, user_list=ulist, msg_list=msg_list)
-        else:
-            email = "youke" + "@hihichat.com"
-            hash = hashlib.md5(email.encode('utf-8')).hexdigest()
-            gravatar_url = 'http://www.gravatar.com/avatar/' + hash + '?s=40&d=identicon&r=g'
-            return render_template('privatechat.html', rname=uname, g=gravatar_url)
+        return render_template('privatechat.html', rname=uname, user_list=ulist, msg_list=msg_list)
     else:
         pass
 
@@ -264,7 +258,6 @@ def send_chat(info):
                 data = json.dumps({'code': 200, 'msg': info})
                 return data
             else:
-                print("hereeeeee")
                 data = json.dumps({'code': 403, 'msg': 'You are not in this room'})
                 return data
         else:
